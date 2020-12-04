@@ -1,0 +1,46 @@
+def getArray() {
+    def diffOutput = new ByteArrayOutputStream()
+    exec {
+        commandLine  'git', 'describe',
+        standardOutput = diffOutput
+    }
+    def ReceivedString = diffOutput.toString()
+    if(ReceivedString.count('.')==2){
+        def currentDotPosition = ReceivedString.indexOf('.')
+        List VersionName = new ArrayList()
+        VersionName.add(ReceivedString.substring(1,currentDotPosition))
+        ReceivedString = ReceivedString.substring(currentDotPosition+1, ReceivedString.length())
+        currentDotPosition = ReceivedString.indexOf('.')
+        VersionName.add(ReceivedString.substring(0,currentDotPosition))
+        def version = ReceivedString.substring(currentDotPosition+1, ReceivedString.length()-1)
+        if (version.length() == 0)
+        {
+            VersionName.add('0')
+        }
+        else{
+            currentDotPosition = version.indexOf('-')
+            if (currentDotPosition > 0) {
+                version = version.substring(currentDotPosition + 1, version.length()-1)
+                currentDotPosition = version.indexOf('-')
+                VersionName.add(version.substring(0, currentDotPosition))
+            }
+            else{
+                VersionName.add(version)
+            }
+        }
+
+        return VersionName
+    } else {
+        return ["0","0","0"]
+    }
+}
+
+static def generateVersionCode(ArrayList array) {
+    def result = (array[0].toInteger()*10000 + array[1].toInteger())*100 + array[2].toInteger()
+    return result
+}
+
+ext {
+    getArray = this.&getArray
+    generateVersionCode = this.&generateVersionCode
+}
