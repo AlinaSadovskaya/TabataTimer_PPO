@@ -15,7 +15,12 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.lab2.tabatatimer.App;
 import com.lab2.tabatatimer.DataBase.DataBaseHelper;
+import com.lab2.tabatatimer.Enums.FontSize;
+import com.lab2.tabatatimer.Enums.Language;
+import com.lab2.tabatatimer.Enums.Setting;
 import com.lab2.tabatatimer.R;
+
+import java.util.Arrays;
 import java.util.Locale;
 
 public class Settings extends PreferenceActivity {
@@ -28,30 +33,31 @@ public class Settings extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         sp = PreferenceManager.getDefaultSharedPreferences(this);
-        if (sp.getBoolean("theme", true)) {
+        if (sp.getBoolean(Setting.THEME.getSetting(), true)) {
             setTheme(R.style.Theme_AppCompat);
         }
-        String font = sp.getString("fontSize", "Малый");
-        String listValue = sp.getString("test_lang", "Английский");
+
+        String font = sp.getString(Setting.FONTSIZE.getSetting(), FontSize.SMALL.getFontSize()[0]);
+        String listValue = sp.getString(Setting.LANG.getSetting(), Language.ENGLISH_r.getLanguage());
         Configuration configuration = new Configuration();
 
         Locale locale;
         assert listValue != null;
-        if (listValue.toLowerCase().equals("english") || listValue.toLowerCase().equals("английский")) {
+        if (listValue.toLowerCase().equals(Language.ENGLISH_e.getLanguage()) || listValue.toLowerCase().equals(Language.ENGLISH_r.getLanguage())) {
             font_def = 1;
-            locale = new Locale("en");
+            locale = new Locale(Language.EN.getLanguage());
         } else {
             font_def = 0;
-            locale = new Locale("ru");
+            locale = new Locale(Language.RUS.getLanguage());
         }
         Locale.setDefault(locale);
         configuration.locale = locale;
 
         assert font != null;
-        if (font.toLowerCase().equals("малый") || font.toLowerCase().equals("small")) {
+        if (Arrays.asList(FontSize.SMALL.getFontSize()).contains(font.toLowerCase())) {
             language_def = 0;
             configuration.fontScale = (float) 0.85;
-        } else if (font.toLowerCase().equals("нормальный") || font.toLowerCase().equals("normal")) {
+        } else if (Arrays.asList(FontSize.NORMAL.getFontSize()).contains(font.toLowerCase())) {
             language_def = 1;
             configuration.fontScale = (float) 1;
         } else {
@@ -74,10 +80,10 @@ public class Settings extends PreferenceActivity {
             super.onCreate(savedInstanceState);
             db = App.getInstance().getDatabase();
             addPreferencesFromResource(R.xml.settings);
-            Preference button = findPreference("DeleteAll");
-            ListPreference language = (ListPreference) findPreference("test_lang");
-            Preference theme = findPreference("theme");
-            ListPreference font = (ListPreference) findPreference("fontSize");
+            Preference button = findPreference(Setting.DELETE_ALL.getSetting());
+            ListPreference language = (ListPreference) findPreference(Setting.LANG.getSetting());
+            Preference theme = findPreference(Setting.THEME.getSetting());
+            ListPreference font = (ListPreference) findPreference(Setting.FONTSIZE.getSetting());
             font.setValueIndex(((Settings) getActivity()).language_def);
             language.setValueIndex(((Settings) getActivity()).font_def);
             theme.setOnPreferenceChangeListener(this::onThemeChange);
@@ -89,10 +95,10 @@ public class Settings extends PreferenceActivity {
 
         private boolean onLanguageChange(Preference preference, Object newValue) {
             Locale locale;
-            if (newValue.toString().toLowerCase().equals("english") || newValue.toString().toLowerCase().equals("английский")) {
-                locale = new Locale("en");
+            if (newValue.toString().toLowerCase().equals(Language.ENGLISH_e.getLanguage()) || newValue.toString().toLowerCase().equals(Language.ENGLISH_r.getLanguage())) {
+                locale = new Locale(Language.EN.getLanguage());
             } else {
-                locale = new Locale("ru");
+                locale = new Locale(Language.RUS.getLanguage());
             }
             Locale.setDefault(locale);
             Configuration configuration = new Configuration();
@@ -105,9 +111,9 @@ public class Settings extends PreferenceActivity {
 
         private boolean onFontChange(Preference preference, Object newValue) {
             Configuration configuration = getResources().getConfiguration();
-            if (newValue.toString().toLowerCase().equals("малый") || newValue.toString().toLowerCase().equals("small")) {
+            if (Arrays.asList(FontSize.SMALL.getFontSize()).contains(newValue.toString().toLowerCase())) {
                 configuration.fontScale = (float) 0.85;
-            } else if (newValue.toString().toLowerCase().equals("нормальный") || newValue.toString().toLowerCase().equals("normal")) {
+            } else if (Arrays.asList(FontSize.SMALL.getFontSize()).contains(newValue.toString().toLowerCase())) {
                 configuration.fontScale = (float) 1;
             } else {
                 configuration.fontScale = (float) 1.15;
